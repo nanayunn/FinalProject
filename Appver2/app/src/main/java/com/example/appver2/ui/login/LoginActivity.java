@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.appver2.CheckOutActivity;
 import com.example.appver2.MainActivity;
+import com.example.appver2.MapActivity;
 import com.example.appver2.R;
 import com.example.appver2.RegisterActivity;
 import com.example.appver2.SaveSharedPreference;
@@ -219,7 +220,7 @@ public class LoginActivity extends AppCompatActivity {
                 hand.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Intent i = new Intent(LoginActivity.this, CheckOutActivity.class);
+                        Intent i = new Intent(LoginActivity.this, MapActivity.class);
                         startActivity(i);
                         finish();
 
