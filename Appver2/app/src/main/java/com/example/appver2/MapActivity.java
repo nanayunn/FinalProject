@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.Adapter;
 import android.widget.ImageView;
 
 import org.json.JSONArray;
@@ -27,7 +28,7 @@ public class MapActivity extends AppCompatActivity {
         private RecyclerView mVerticalView;
         private VerticalAdapter mAdapter;
         private LinearLayoutManager mLayoutManager;
-
+        private static ArrayList<VerticalData> data;
         private int MAX_ITEM_COUNT = 5;
 
         @Override
@@ -37,18 +38,10 @@ public class MapActivity extends AppCompatActivity {
 
             // RecyclerView binding
             mVerticalView = (RecyclerView) findViewById(R.id.vertical_list);
-            String url = "http://70.12.113.206/oracledb/androidCardLogin.jsp";
-
-
-
-            NetworkTask networkTask = new NetworkTask(url, null);
-
-            networkTask.execute();
 
             // init Data
-            ArrayList<VerticalData> data = new ArrayList<>();
+            data = new ArrayList<>();
             ArrayList<ImageView> img = new ArrayList<>();
-
 
             int i = 0;
             while (i < MAX_ITEM_COUNT) {
@@ -321,60 +314,3 @@ public class MapActivity extends AppCompatActivity {
 
 
 
-//    private List<lst> itemsList = new ArrayList<lst>();
-//    private RecyclerViewAdapter adapter2;
-//
-//    private RecyclerView listview;
-//    private MyAdapter adapter;
-//    RecyclerView recyclerview;
-//
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_map);
-
-//        recyclerview = findViewById(R.id.recycler);
-//
-//        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-//        recyclerview.setLayoutManager(linearLayoutManager);
-//
-//        recyclerview.setAdapter(adapter);
-//        Set<String> noti_set = PreferenceManager.getDefaultSharedPreferences(this).getStringSet("noti_set", new HashSet<String>());
-//        for (String noti : noti_set) {
-//            String[] notification = noti.split("---");
-//            String title = notification[0];
-//            String msg = notification[1];
-//            lst ls = new lst();
-//            ls.setMsg(msg);
-//            ls.setTitle(title);
-//            itemsList.add(ls);
-//            adapter.notifyDataSetChanged();
-
-//----------------------
-// 파이어베이스 에서 데이터를 가져 옴
-//        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                // 부모가 User 인데 부모 그대로 가져오면 User 각각의 데이터 이니까 자식으로 가져와서 담아줌
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-//
-//                    User user = snapshot.getValue(User.class);
-//                    user.User = snapshot.getKey();
-//                    Log.i("id", user.User);
-//                    Log.i("Userid", user.getUserid());
-//                    Log.i("UserAge", user.getUserage());
-//
-//                    userList.add(user);
-//                }
-//
-//                //어뎁터한테 데이터 넣어줬다고 알려줌 (안하면 화면에 안나온다)
-////                adapter.notifyDataSetChanged();
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w("MainActivity", "loadPost:onCancelled", databaseError.toException());
-//            }
-//        });

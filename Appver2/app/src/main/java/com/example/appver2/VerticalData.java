@@ -4,7 +4,7 @@ import android.media.Image;
 
 
 
-class VerticalData {
+public class VerticalData {
 
     int img;
 
