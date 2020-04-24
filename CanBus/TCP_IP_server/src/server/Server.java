@@ -93,7 +93,11 @@ public class Server {
          while (ois != null) {
             try {
                msg = (Msg) ois.readObject();
-               System.out.println(msg.getId() + ":" + msg.getTxt());
+               System.out.println("id´Â?:"+ msg.getId());
+              System.out.println("txt´Â?:" + msg.getTxt());
+              System.out.println("tid´Â?: "+ msg.getTid());
+               
+               
               clientgetData.sendPostJson(socket.getInetAddress().toString(),msg.getId());
                if (msg.getTxt().equals("q")) {
                   System.out.println(msg.getId() + ":Exit ..");
@@ -175,10 +179,13 @@ public class Server {
    public void sendMsg(Msg msg) {
       System.out.println("hihi");
       String ip = msg.getTid();
-
+	      if(ip != null) {
+		Sender2 sender2 = new Sender2(msg);
+		sender2.start();
+	      }else {
       Sender sender = new Sender(msg);
       sender.start();
-
+      }
    }
 
    public static void main(String[] args) {
