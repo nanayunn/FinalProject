@@ -31,7 +31,7 @@ public class UI extends Application {
 
     private              Gauge          gauge8;
 
-
+    private static       int i = 0;
     private              long           lastTimerCall;
     private              AnimationTimer timer;
     static SerialReadWrite sw= new SerialReadWrite();
@@ -42,7 +42,7 @@ public class UI extends Application {
     	
         
         try {
-			sw = new SerialReadWrite("COM12");
+			sw = new SerialReadWrite("COM7");
 			//sc.consoleStart();
 		} catch (Exception e) {
 		    System.out.println("Connect Fail !");
@@ -106,13 +106,26 @@ public class UI extends Application {
             	if (now > lastTimerCall + 300_000_000l) {
                     
                     try{
-                    	 if(sw.getVelocity()!=null) {
-                    		 gauge8.setValue(Double.parseDouble(sw.getVelocity()));
-                    		 
-                         }else {
-                         	gauge8.setValue(0);
-                         	
-                         }
+                    	
+                    		gauge8.setValue(i);
+                        	int a = (int) (Math.random()*160+1);
+                        	String aa = String.valueOf(a);
+                        	gauge8.setValue(Double.parseDouble(aa));
+                        	sw.send(aa+"");
+                        	Thread.sleep(1000);
+                        	
+//        					
+//                    	 if(sw.getVelocity()!=null) {
+//                    		 int a = (int) (Math.random()*160+1);
+//                    		 String aa = String.valueOf(a);
+////                    		 gauge8.setValue(Double.parseDouble(sw.getVelocity()));
+////                    		 sw.send(sw.getVelocity()+"");
+//                    		 gauge8.setValue(Double.parseDouble(aa));
+//                    		 sw.send(aa+"");
+//                         }else {
+//                         	gauge8.setValue(0);
+//                         	
+//                         }
                     	
                     }catch(Exception e) {
                     	e.printStackTrace();

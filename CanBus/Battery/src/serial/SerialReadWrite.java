@@ -245,7 +245,7 @@ public class SerialReadWrite implements SerialPortEventListener {
    public static String parseData(String ss) {
       StringBuilder sb = new StringBuilder(ss);
       String id= sb.substring(4, 12);
-      String txt = sb.substring(25, 28);
+      String txt = sb.substring(26, 28);
       txt=Integer.parseInt(txt)+"";
       System.out.println("id:"+id+" "+ "txt : "+txt);
       return txt;

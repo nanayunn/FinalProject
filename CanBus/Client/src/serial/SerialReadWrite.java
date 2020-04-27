@@ -20,7 +20,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -30,13 +29,11 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-
-
-
+import msg.Client;
+import msg.Client.Sender;
+import msg.Msg;
 
 public class SerialReadWrite implements SerialPortEventListener {
-	HashMap<String, ObjectOutputStream>
-	maps = new HashMap<>();
 
    CommPortIdentifier commPortIdentifier;
    CommPort comPort;
@@ -46,11 +43,15 @@ public class SerialReadWrite implements SerialPortEventListener {
    String id;// "00000000";
    String data; // "0000000000000000";
    String msg; // id+data;
-   
-
-   public int velocity;
-   
+   static Client client;
    static Socket socket;
+   String batteryId = "00000001";
+   String velocityId = "00000002";
+   String tempId = "00000003";
+   //String ip = "192.168.1.211";
+   static String parsedId;
+   static String parsedTxt;
+   static String parsedvelTxt;
 
    public String getId() {
       return id;
@@ -76,17 +77,8 @@ public class SerialReadWrite implements SerialPortEventListener {
       return this.msg;
    }
 
-
-	public int getVelocity() {
-		return velocity;
-	}
-	
-	public void setVelocity(int velocity) {
-		this.velocity = velocity;
-	}
-	
-	public SerialReadWrite() {
-	   }
+   public SerialReadWrite() {
+   }
 
    public SerialReadWrite(String portName) throws Exception {
       commPortIdentifier = CommPortIdentifier.getPortIdentifier(portName);
@@ -102,12 +94,12 @@ public class SerialReadWrite implements SerialPortEventListener {
       if (commPortIdentifier.isCurrentlyOwned()) { // 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙構占� 占쌍댐옙占쏙옙
          System.out.println("Port is currently in use...");
       } else {
-         comPort = commPortIdentifier.open(this.getClass().getName(), 2000);
+         comPort = commPortIdentifier.open(this.getClass().getName(), 5000);
          if (comPort instanceof SerialPort) {
             SerialPort serialPort = (SerialPort) comPort;
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
-            serialPort.setSerialPortParams(9600, // 占쏙옙탉撻占�
+            serialPort.setSerialPortParams(921600, // 占쏙옙탉撻占�
                   SerialPort.DATABITS_8, // 占쏙옙占쏙옙占쏙옙 占쏙옙트
                   SerialPort.STOPBITS_1, // stop 占쏙옙트
                   SerialPort.PARITY_NONE); // 占싻몌옙티
@@ -123,7 +115,7 @@ public class SerialReadWrite implements SerialPortEventListener {
 
    @Override
    public void serialEvent(SerialPortEvent event) {
-		//lb.setText("접속자:"+maps.size());
+
       switch (event.getEventType()) {
       case SerialPortEvent.BI:
       case SerialPortEvent.OE:
@@ -145,13 +137,45 @@ public class SerialReadWrite implements SerialPortEventListener {
             }
 
             String ss = new String(readBuffer);
+            System.out.println(" ");
             System.out.println("Receive Low Data:" + ss + "||");
-       
+          
             if(ss.charAt(1)=='U') {
-               String data =parseData(ss);
-              
+               //String data =parseDatabyId(ss);
+               parsedId =parseDatabyId(ss);
+               parsedTxt = parseDatatxt(ss);
+               parsedvelTxt = parseDataveltxt(ss);
+               
+               if(parsedId.equals(batteryId)) {
+            	   String data =parseData(ss);
+            	   System.out.println("Receive Battery Data:" + data + "||");
+            	  
+            	   
+//            	   client.sendData(parsedId, parsedTxt);
+//            	   System.out.println("send BatteryID to Pad : " + parsedId);
+//            	   System.out.println("send BatteryTxt to Pad : " + parsedTxt);
+					//client.sendData(parsedId, parsedTxt);
+            	  // client.sendData(data.substring(0, 8),data.substring(8));
+               }else if(parsedId.equals(velocityId)) {
+            	   String data =parseDatavel(ss);
+            	   System.out.println("Receive Velocity Data:" + data + "||");
+            	   
+//            	   client.sendData(parsedId, parsedvelTxt);
+//            	   System.out.println("send BatteryID to Pad : " + parsedId);
+//            	   System.out.println("send Txt to Pad : " + parsedvelTxt+" km");
+            	   //client.sendData(data.substring(0, 8),data.substring(8));
+               }else if(parsedId.equals(tempId)) {
+            	   String data =parseData(ss);
+            	   System.out.println("Receive temperature Data:" + data + "||");
+            	   //client.sendData(data.substring(0, 8),data.substring(8));
+               }else {
+            	   System.out.println("Receive Undefined Data:" + parsedId+ "||");
+            	   System.out.println(" ");
+               }
+               
             }
-            
+         
+
          } catch (Exception e) {
             e.printStackTrace();
          }
@@ -167,23 +191,7 @@ public class SerialReadWrite implements SerialPortEventListener {
    public void adminSend(String msg) {
       new Thread(new Serialwrite(msg)).start();
    }
-   
-//   public int[] setRanValue() {
-//	   int[] batteryVal = new int[30];
-//	   for(int i = 0;i<batteryVal.length;i++) {
-//		   batteryVal[i] = (int)(Math.random()*100+1);
-//		   for (int j = 0;j<i;j++) {
-//			   if(batteryVal[j]==batteryVal[j]) {
-//				   i--;
-//				   break;
-//			   }
-//		   }
-//	   }
-//	   Arrays.sort(batteryVal);
-//	   System.out.println(batteryVal);
-//	   return batteryVal;
-//   }
-   
+
    class Serialwrite implements Runnable {
 
       String data;
@@ -197,7 +205,7 @@ public class SerialReadWrite implements SerialPortEventListener {
       }
 
       public String convertData(String msg) {
-         String id = "00000002";
+         String id = "00000000";
          //msg = msg.toUpperCase();
          System.out.println("convertData msg: "+msg);
          if(msg.length() == 1) {
@@ -243,17 +251,106 @@ public class SerialReadWrite implements SerialPortEventListener {
    }
 
    public static String parseData(String ss) {
+	   StringBuilder sb = new StringBuilder(ss);
+	   String id= sb.substring(4, 12);
+	   String txt = sb.substring(26, 28);
+	   txt=Integer.parseInt(txt)+"";
+	   System.out.println("id:"+id+" "+ "txt : "+txt);
+	   return id+txt;
+   }
+   public static String parseDatatxt(String ss) {
       StringBuilder sb = new StringBuilder(ss);
       String id= sb.substring(4, 12);
-      String txt = sb.substring(25, 28);
+      String txt = sb.substring(26, 28);
       txt=Integer.parseInt(txt)+"";
-      System.out.println("id:"+id+" "+ "txt : "+txt);
+      System.out.println("txt : "+txt);
       return txt;
    }
-
-
+   public static String parseDatavel(String ss) {
+	   StringBuilder sb = new StringBuilder(ss);
+	   String id= sb.substring(4, 12);
+	   String txt = sb.substring(25, 28);
+	   txt=Integer.parseInt(txt)+"";
+	   System.out.println("id:"+id+" "+ "txt : "+txt);
+	   return id+txt;
+   }
+   public static String parseDataveltxt(String ss) {
+	   StringBuilder sb = new StringBuilder(ss);
+	   String id= sb.substring(4, 12);
+	   String txt = sb.substring(25, 28);
+	   txt=Integer.parseInt(txt)+"";
+	   System.out.println("txt : "+txt);
+	   return txt;
+   }
+   public static String parseDatabyId(String ss) {
+	   StringBuilder sb = new StringBuilder(ss);
+	   String id= sb.substring(4, 12);
+	   String txt = sb.substring(26, 28);
+	   txt=Integer.parseInt(txt)+"";
+	   System.out.println("id:"+id);
+	   return id;
+   }
    
-   
-  
+// 
+   public static void main(String[] args) {
+
+      SerialReadWrite sc = null;
+      SerialReadWrite sw = null;
+     
+      try {
+         sc = new SerialReadWrite("COM15");
+         System.out.println("Connected");
+        // sw = new SerialReadWrite("COM16");
+       //  System.out.println("Connected Velocity");
+//         
+//         client = new Client("70.12.225.143", 8888);
+//         System.out.println("network Connected");
+//         
+         
+         
+//         new Thread(new Runnable() {
+//         
+//         @Override
+//         public void run() {
+//            client.startClient();
+//            
+//         }
+//      }).start();
+//         
+//         socket= client.getSocket();
+//       String sendmsg = client.getVel();
+//       final SerialReadWrite finalsc = sc;
+//       new Thread(new Runnable(){
+//          
+//          @Override
+//          public void run() {
+//             while(true){
+//               
+//                if(client.getSerialThreadControl() && client.getVel() !=null){
+//                   System.out.println("send to ECU");
+//                   finalsc.adminSend(client.getVel());
+//                  client.setSerialThreadControl(false);    
+//                }
+//                try {
+//                  Thread.sleep(500);
+//               } catch (InterruptedException e) {
+//                  // TODO Auto-generated catch block
+//                  e.printStackTrace();
+//               }
+//                continue;
+//               
+//             }
+//             
+//          }
+//       }).start();
+//      
+         
+      } catch (Exception e) {
+         System.out.println("Connect Fail !");
+         e.printStackTrace();
+      }
+
+   }
 
 }
+

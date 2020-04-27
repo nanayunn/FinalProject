@@ -61,7 +61,7 @@ public class UI extends Application {
     	
     	
     	try {
-			sw = new SerialReadWrite("COM12");
+			sw = new SerialReadWrite("COM3");
 		
 		} catch (Exception e) {
 		    System.out.println("Connect Fail !");
